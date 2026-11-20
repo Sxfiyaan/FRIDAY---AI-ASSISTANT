@@ -1,0 +1,1 @@
+"""FRIDAY personal assistant."""
