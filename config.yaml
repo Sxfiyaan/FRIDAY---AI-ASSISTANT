@@ -12,4 +12,10 @@ request:
   timeout_seconds: 60
   retries: 2
 logging:
-  path: logs/friday.jsonl
+  path: logs/events.jsonl
+  detailed: false
+history:
+  enabled: false
+  path: data/friday.sqlite3
+  key_env: FRIDAY_HISTORY_KEY
+  retention_days: 30

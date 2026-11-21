@@ -3,12 +3,13 @@
 from collections.abc import Iterator, Sequence
 from typing import Protocol, TypeAlias
 
+from friday.safety.privacy import SafeError
+
 Message: TypeAlias = dict[str, str]
 ChatOutput: TypeAlias = str | Iterator[str]
 
 
-class LLMError(RuntimeError):
-    """A configuration, transport, or response error from an LLM provider."""
+LLMError = SafeError
 
 
 class LLMProvider(Protocol):

@@ -6,7 +6,7 @@ from typing import Literal
 
 import yaml
 from dotenv import load_dotenv
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class ProviderSettings(BaseModel):
@@ -23,6 +23,14 @@ class RequestSettings(BaseModel):
 
 class LoggingSettings(BaseModel):
     path: Path = Path("logs/friday.jsonl")
+    detailed: bool = False
+
+
+class HistorySettings(BaseModel):
+    enabled: bool = False
+    path: Path | None = None
+    key_env: str = "FRIDAY_HISTORY_KEY"
+    retention_days: int = Field(default=30, ge=1, le=36500)
 
 
 class Settings(BaseModel):
@@ -30,6 +38,13 @@ class Settings(BaseModel):
     providers: dict[str, ProviderSettings]
     request: RequestSettings = RequestSettings()
     logging: LoggingSettings = LoggingSettings()
+    history: HistorySettings = HistorySettings()
+
+    @model_validator(mode="after")
+    def distinct_storage_paths(self) -> "Settings":
+        if self.history.path and self.history.path.resolve() == self.logging.path.resolve():
+            raise ValueError("History and operational logs require separate files.")
+        return self
 
     def selected_provider(self) -> ProviderSettings:
         return self.providers[self.provider]

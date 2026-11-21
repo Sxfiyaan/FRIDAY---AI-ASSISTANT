@@ -32,3 +32,9 @@ Safety, tests, and evaluations are part of the early milestones rather than a fi
 ## Milestone 0 acceptance
 
 `friday chat "hello"` and the interactive REPL use the same chat interface. Switching between Groq and Ollama requires configuration changes only. Provider failures surface as a clear FRIDAY error, with bounded timeouts and retries.
+
+## Implemented privacy boundary
+
+Both CLI chat paths emit typed operational events through `friday.logging`. The schema admits request metadata, safe outcome codes and optional tool/approval metadata. The logger validates identifier-shaped labels and applies the shared redactor to configured model names, tool names and provider request identifiers. Token counts are scoped to each request. Debugging adds the streaming flag. The shared provider client classifies failures using exception types, HTTP status and a UUID-form request header. The CLI displays a safe diagnostic.
+
+Conversation persistence lives in `friday.memory.conversations`. The existing in-memory REPL context works with persistence disabled. When enabled, a transaction stores each completed turn as a single Fernet-authenticated ciphertext in SQLite. The configured history key acts as a local bearer credential. A derived owner identifier scopes listing, reading and deleting. Each ciphertext binds the conversation ID to its contents. SQLite retains operational indexes, timestamps and pseudonymous ownership identifiers in cleartext. The application purges expired turns on database access and supports explicit deletion even after capture is disabled. The current trust boundary is the local OS user and their private key, filesystem permissions and backups.
