@@ -1,4 +1,4 @@
-provider: groq
+provider: ollama
 providers:
   groq:
     base_url: https://api.groq.com/openai/v1
@@ -6,7 +6,7 @@ providers:
     api_key_env: GROQ_API_KEY
   ollama:
     base_url: http://localhost:11434/v1
-    model: qwen3.5:9b
+    model: qwen3.5:4b
     api_key_env: OLLAMA_API_KEY
 request:
   timeout_seconds: 60

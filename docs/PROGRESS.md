@@ -1,8 +1,20 @@
 # FRIDAY Progress
 
+## Architecture review and milestone roadmap
+
+**2026-11-21 — Multi-model routing is a required architectural change.** The [updated specification](ARCHITECTURE.md) covers product requirements, the architecture diagram, model strategy, provider and routing contracts, permission checks and eight acceptance tests.
+
+| Stage | Status and deliverable |
+| --- | --- |
+| Milestone 0 foundation | Committed as `84a87ed`. One-shot and streaming chat verified with the current local Ollama model, `qwen3.5:4b`. Live Groq verification remains open. |
+| Pre-Milestone 1 review | Specification ready for user review. The target pairs Groq `openai/gpt-oss-20b` for text reasoning with local Ollama `qwen3.5:9b` for vision. Review the routing rules, privacy-aware handoff, overrides, failure behavior and acceptance criteria before implementation. |
+| Milestone 1 | Awaiting specification review and approval. Planned work covers provider adapters, capability-aware selection, orchestrator handoffs, user-visible routing decisions and the specified tests. |
+
+The routing change has been documented only. The Milestone 0 entries below record earlier work.
+
 ## Milestone 0: Foundation
 
-Status: implementation complete; automated checks pass. Live-provider verification remains.
+**Foundation complete.** Automated checks pass. The security review identified open findings below.
 
 - Added project rules and architecture documentation.
 - Added YAML plus `.env` settings for Groq and Ollama.
@@ -10,10 +22,15 @@ Status: implementation complete; automated checks pass. Live-provider verificati
 - Added `friday chat` and `friday repl` commands with JSONL activity logging.
 - Added offline fake-provider and config environment-override tests; `pytest` passes (3 tests).
 - Ruff passes (`uv run ruff check .`).
-- Set Ollama as the default provider with the configured local model `qwen3.5:9b`.
-- Configured Groq model `openai/gpt-oss-120b`, listed as a production model in [Groq's model docs](https://console.groq.com/docs/models). Add `GROQ_API_KEY` to local `.env` before selecting Groq.
-- A real-provider smoke test still requires a running Ollama server or valid Groq credentials and is not part of the offline test suite.
-- Milestone commit: pending.
+- Verified the foundation commit in Git history (`84a87ed`).
+
+### Verification and security review
+
+- All three automated tests and Ruff passed. A separate simulated timeout check confirmed the configured timeout and retry limit and the final provider error.
+- Live Ollama one-shot chat and the streaming REPL both returned a reply using `qwen3.5:4b`. Groq configuration has offline test coverage only in this review.
+- Git ignores the local `.env` and JSONL logs. Neither is tracked. A limited common-secret-pattern scan found no matches in tracked working-tree files.
+- The original review found complete chat turns in the JSONL log and raw upstream error text in the terminal. The privacy implementation below addresses both findings for new sessions.
+- The locked-dependency scan flagged pytest 8.4.2, a development dependency, for a Unix temporary-directory issue. The advisory lists 9.0.3 as fixed, outside the current pytest version constraint. [PYSEC-2026-1845](https://osv.dev/vulnerability/PYSEC-2026-1845)
 
 ### Privacy implementation
 
